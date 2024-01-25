@@ -23,14 +23,13 @@ histoevname: hNEvents
 #info for trees (files can be different if trees are filtered or with applied ML models)
 tree:
     particle: Ds #needed to define binning for invariant-mass histo
-    filenameAll: [/home/fchinu/Ds_pp_13TeV/ml_training/Adjusted mass/results/FD/test_fraction=0.2/pt12_50/Prompt_pT_12_50_ModelApplied.parquet.gzip,
-                     /home/fchinu/Ds_pp_13TeV/ml_training/Adjusted mass/results/FD/test_fraction=0.2/pt1_2/Prompt_pT_1_2_ModelApplied.parquet.gzip,
-                     /home/fchinu/Ds_pp_13TeV/ml_training/Adjusted mass/results/FD/test_fraction=0.2/pt2_4/Prompt_pT_2_4_ModelApplied.parquet.gzip,
-                     /home/fchinu/Ds_pp_13TeV/ml_training/Adjusted mass/results/FD/test_fraction=0.2/pt4_6/Prompt_pT_4_6_ModelApplied.parquet.gzip,
-                     /home/fchinu/Ds_pp_13TeV/ml_training/Adjusted mass/results/FD/test_fraction=0.2/pt6_8/Prompt_pT_6_8_ModelApplied.parquet.gzip,
-                     /home/fchinu/Ds_pp_13TeV/ml_training/Adjusted mass/results/FD/test_fraction=0.2/pt8_12/Prompt_pT_8_12_ModelApplied.parquet.gzip
-                     ] #not needed for MC
+    filenameAll: [ /home/fchinu/Run3/Ds_pp_13TeV/ML/Application/pt2_4/Data_pT_2_4_ModelApplied.parquet.gzip,
+            /home/fchinu/Run3/Ds_pp_13TeV/ML/Application/pt4_6/Data_pT_4_6_ModelApplied.parquet.gzip,
+            /home/fchinu/Run3/Ds_pp_13TeV/ML/Application/pt6_8/Data_pT_6_8_ModelApplied.parquet.gzip,
+            /home/fchinu/Run3/Ds_pp_13TeV/ML/Application/pt8_12/Data_pT_8_12_ModelApplied.parquet.gzip,
+            /home/fchinu/Run3/Ds_pp_13TeV/ML/Application/pt12_50/Data_pT_12_50_ModelApplied.parquet.gzip
+] #not needed for MC
     filenamePrompt: null
     filenameFD: null
-    dirname: PWGHF_D2H_InvMassDs_Ds_Loose_kMB
-    treename: treeMLDs
+    dirname: null
+    treename: null
