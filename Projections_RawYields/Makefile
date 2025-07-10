@@ -49,7 +49,7 @@ PROJ_OUTPUT = $(OUTPUT_PROJ)/projections.done
 FIT_OUTPUT = $(OUTPUT_FIT)/rawYields.done
 
 # Define the targets
-.PHONY: all clean help setup
+.PHONY: all clean-output help setup
 
 # Default target
 all: setup project fit
@@ -57,12 +57,12 @@ all: setup project fit
 # Help target
 help:
 	@echo "Available targets:"
-	@echo "  all        - Run complete pipeline (setup -> project -> fit)"
-	@echo "  setup      - Create directories and copy config files"
-	@echo "  project    - Run projections"
-	@echo "  fit        - Run fitting"
-	@echo "  clean      - Remove output directories"
-	@echo "  help       - Show this help message"
+	@echo "  all        	- Run complete pipeline (setup -> project -> fit)"
+	@echo "  setup      	- Create directories and copy config files"
+	@echo "  project    	- Run projections"
+	@echo "  fit        	- Run fitting"
+	@echo "  clean-output	- Remove output files but keep configs"
+	@echo "  help       	- Show this help message"
 	@echo ""
 	@echo "Variables:"
 	@echo "  NAME=$(NAME) - Trial name (override with NAME=your_trial)"
@@ -79,45 +79,44 @@ setup: $(OUTPUT_PROJ) $(OUTPUT_FIT) $(DEST_CONFIG_PROJ) $(DEST_CONFIG_FIT) $(DES
 
 # Create directories
 $(OUTPUT_PROJ):
-	mkdir -p $@
+	@mkdir -p $@
 
 $(OUTPUT_FIT):
-	mkdir -p $@
+	@mkdir -p $@
 
 # Copy and modify configuration files
 $(DEST_CONFIG_PROJ): $(SRC_CONFIG_PROJ) | $(OUTPUT_PROJ)
-	cp $< $@
-	sed -i 's|directory: .*|directory: "$(abspath $(OUTPUT_PROJ))"|g' $@
+	@cp $< $@
+	@sed -i 's|directory: .*|directory: "$(abspath $(OUTPUT_PROJ))"|g' $@
+	@sed -i 's|cutset: .*|cutset: "$(abspath $(DEST_CONFIG_CUTSET))"|g' $@
 
 $(DEST_CONFIG_FIT): $(SRC_CONFIG_FIT) | $(OUTPUT_FIT)
-	cp $< $@
-	sed -i 's|directory: .*|directory: "$(abspath $(OUTPUT_FIT))"|g' $@
+	@cp $< $@
+	@sed -i 's|directory: .*|directory: "$(abspath $(OUTPUT_FIT))"|g' $@
+	@sed -i 's|cutset: .*|cutset: "$(abspath $(DEST_CONFIG_CUTSET))"|g' $@
+	@sed -i 's|data: .*|data: "$(abspath $(OUTPUT_PROJ)/projections.root)"|g' $@
 
 $(DEST_CONFIG_CUTSET): $(SRC_CONFIG_CUTSET) | $(OUTPUT_PROJ)
-	cp $< $@
+	@cp $< $@
 
 # Run projections
 $(PROJ_OUTPUT): $(DEST_CONFIG_PROJ) $(DEST_CONFIG_CUTSET) $(PROJ_SCRIPT)
-	cd $(OUTPUT_PROJ) && python3 $(abspath $(PROJ_SCRIPT)) $(CONFIG_PROJ)
+	@cd $(OUTPUT_PROJ) && find . -name "*.root" -delete && python3 $(abspath $(PROJ_SCRIPT)) $(CONFIG_PROJ) && hadd -f ./projections.root ./*.root
 	@touch $@
 
 # Run fitting (depends on projections being complete)
 $(FIT_OUTPUT): $(PROJ_OUTPUT) $(DEST_CONFIG_FIT) $(FIT_SCRIPT)
-	cd $(OUTPUT_FIT) && python3 $(abspath $(PROJ_SCRIPT)) $(CONFIG_FIT)
+	@cd $(OUTPUT_FIT) && python3 $(abspath $(FIT_SCRIPT)) $(CONFIG_FIT)
 	@touch $@
 
 # Convenient aliases
 project: $(PROJ_OUTPUT)
 fit: $(FIT_OUTPUT)
 
-# Clean up
-clean:
-	rm -rf $(TRIAL_DIR)
-
 # Alternative clean that preserves configs
 clean-output:
-	find $(OUTPUT_PROJ) -name "*.done" -delete
-	find $(OUTPUT_FIT) -name "*.done" -delete
+	find $(OUTPUT_PROJ) \( -name "*.done" -o -name "*.root" -o -name "*.pdf" -o -name "*.png" -o -name "*.parquet" \) -delete
+	find $(OUTPUT_FIT) \( -name "*.done" -o -name "*.root" -o -name "*.pdf" -o -name "*.png" -o -name "*.parquet" \) -delete
 	# Add specific output files to clean as needed
 
 # Debug target to show variables

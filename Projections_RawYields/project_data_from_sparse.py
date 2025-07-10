@@ -176,7 +176,7 @@ def project_sparse(config_file_name):  # pylint: disable=too-many-locals
     with open(config_file_name, 'r', encoding="utf8") as config_file:
         config = yaml.load(config_file, yaml.FullLoader)
 
-    with open(config["cut_set_file_name"], 'r', encoding="utf8") as cuts_config_file:
+    with open(config["inputs"]["cutset"], 'r', encoding="utf8") as cuts_config_file:
         cuts_config = yaml.load(cuts_config_file, yaml.FullLoader)
 
     sparses = load_sparse_from_task(config["inputs"])

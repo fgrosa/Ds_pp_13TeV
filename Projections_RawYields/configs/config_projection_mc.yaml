@@ -18,7 +18,7 @@ inputs:
   sparses: hf-task-ds/Data/hSparseMass
   event_histogram: eventselection-run3/luminosity/hCounterTVXafterBCcuts
 
-cut_set_file_name: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/configs/cutset_OO5TeV.yml
+  cutset: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/configs/cutset_OO5TeV.yml
 
 max_workers: 10
 

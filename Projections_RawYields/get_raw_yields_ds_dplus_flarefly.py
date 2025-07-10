@@ -10,6 +10,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = ""  # pylint: disable=wrong-import-position
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.offsetbox import AnchoredText  # noqa: E402
 import dataclasses  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
@@ -263,6 +264,50 @@ class HistHandler:  # pylint: disable=too-many-instance-attributes
             for histos in self._histos.values():
                 for hist in histos:
                     hist.Write()
+
+
+# pylint: disable=too-many-arguments
+def add_info_on_canvas(axs, loc, pt_min, pt_max, cent_min=None, cent_max=None, fitter=None):
+    """
+    Helper method to add text on flarefly mass fit plot
+
+    Parameters
+    ----------
+    - axs: matplotlib.figure.Axis
+        Axis instance of the mass fit figure
+
+    - loc: str
+        Location of the info on the figure
+
+    - pt_min: float
+        Minimum pT value in the pT range
+
+    - pt_max: float
+        Maximum pT value in the pT range
+    
+    - cent_min: float
+        Minimum centrality value (default: None)
+
+    - cent_max: float
+        Maximum centrality value (default: None)
+
+    - fitter: F2MassFitter
+        Fitter instance allowing to access chi2 and ndf if wanted
+    """
+    xspace = " "
+    text = xspace
+    if fitter is not None:
+        chi2 = fitter.get_chi2()
+        ndf = fitter.get_ndf()
+        text += fr"$\chi^2 / \mathrm{{ndf}} =${chi2:.2f} / {ndf} $\simeq$ {chi2/ndf:.2f}""\n"
+
+    text += "\n\n"
+    text += xspace + fr"{pt_min:.0f} < $p_{{\mathrm{{T}}}}$ < {pt_max:.0f} GeV/$c$, $|y|$ < 0.5""\n"
+    if cent_min is not None and cent_max is not None:
+        text += xspace + fr"{cent_min:.0f}% < Cent. < {cent_max:.0f}%" + "\n"
+
+    anchored_text = AnchoredText(text, loc=loc, frameon=False)
+    axs.add_artist(anchored_text)
 
 
 def load_inputs(cfg, cut_set):
@@ -847,13 +892,14 @@ def do_fit(fit_config, cfg):  # pylint: disable=too-many-locals, too-many-branch
 
         loc = ["lower left", "upper left"]
         ax_title = r"$M(\mathrm{KK\pi})$ GeV$/c^2$"
-        fig, _ = fitter.plot_mass_fit(
+        fig, ax = fitter.plot_mass_fit(
             style="ATLAS",
             show_extra_info = (bkg_funcs != ["nobkg"]),
             figsize=(8, 8), extra_info_loc=loc,
             legend_loc="upper right",
             axis_title=ax_title
         )
+        add_info_on_canvas(ax, "center right", pt_min, pt_max, cent_min, cent_max)
         figres = fitter.plot_raw_residuals(
             figsize=(8, 8), style="ATLAS",
             extra_info_loc=loc, axis_title=ax_title
