@@ -43,7 +43,7 @@ def load_sparse_from_task(config_input):
         with ROOT.TFile.Open(input_file_name, "READ") as input_file:
             sparses.append(input_file.Get(sparse_name))
             print(input_file_name, sparses[-1])
-
+    print(sparses)
     return sparses
 
 

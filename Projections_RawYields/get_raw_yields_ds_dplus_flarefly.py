@@ -837,9 +837,9 @@ def do_fit(fit_config, cfg):  # pylint: disable=too-many-locals, too-many-branch
     n_signal = len(fit_config["signal_func"])
     fit_result = fitter.mass_zfit()
     #if fit_result.converged:
-    if cfg["outputs"]["save_all_fits"]:
+    if cfg["output"]["save_all_fits"]:
         output_dir = os.path.join(
-            os.path.expanduser(cfg["outputs"]["directory"]),
+            os.path.expanduser(cfg["output"]["directory"]),
             "fits"
         )
         if not os.path.exists(output_dir):
@@ -858,15 +858,15 @@ def do_fit(fit_config, cfg):  # pylint: disable=too-many-locals, too-many-branch
             figsize=(8, 8), style="ATLAS",
             extra_info_loc=loc, axis_title=ax_title
         )
-        for frmt in cfg["outputs"]["formats"]:
+        for frmt in cfg["output"]["formats"]:
             if cent_min is not None and cent_max is not None:
                 suffix = f"_{pt_min * 10:.0f}_{pt_max * 10:.0f}_cent_{cent_min:.0f}_{cent_max:.0f}_"  # pylint: disable=line-too-long # noqa: E501
             else:
                 suffix = f"_{pt_min * 10:.0f}_{pt_max * 10:.0f}_"
-            suffix += cfg["outputs"]["suffix"]
+            suffix += cfg["output"]["suffix"]
             if frmt == "root":
                 fitter.dump_to_root(
-                    f"{output_dir}/fits_{cfg['outputs']['suffix']}.{frmt}", 
+                    f"{output_dir}/fits_{cfg['output']['suffix']}.{frmt}", 
                     option="update", suffix=suffix, num=5000
                 )
             else:
@@ -971,12 +971,12 @@ def fit(config_file_name):
     fit_configs = create_fit_configs(cfg, cut_set)
 
     # recreate root file if needed
-    if "root" in cfg["outputs"]["formats"]:
+    if "root" in cfg["output"]["formats"]:
         output_dir = os.path.join(
-            os.path.expanduser(cfg["outputs"]["directory"]),
+            os.path.expanduser(cfg["output"]["directory"]),
             "fits"
         )
-        uproot.recreate(f"{output_dir}/fits_{cfg['outputs']['suffix']}.root")
+        uproot.recreate(f"{output_dir}/fits_{cfg['output']['suffix']}.root")
 
     bkg_cfg = cfg["fit_configs"]["bkg"]
     if (any(bkg_cfg["use_bkg_templ"]) and any(bkg_cfg["templ_norm"]["fix_to_mb"])) or\
@@ -1087,15 +1087,15 @@ def fit(config_file_name):
         output_df.append(out_dict)
     output_df = pd.DataFrame(output_df)
     output_df.to_parquet(os.path.join(
-        os.path.expanduser(cfg["outputs"]["directory"]),
-        f'fit_results{cfg["outputs"]["suffix"]}.parquet'
+        os.path.expanduser(cfg["output"]["directory"]),
+        f'fit_results{cfg["output"]["suffix"]}.parquet'
     ), index=False)
 
     h_handler.set_histos(output_df)
 
     h_handler.dump_to_root(os.path.join(
-        os.path.expanduser(cfg["outputs"]["directory"]),
-        f'mass_fits{cfg["outputs"]["suffix"]}.root'
+        os.path.expanduser(cfg["output"]["directory"]),
+        f'mass_fits{cfg["output"]["suffix"]}.root'
     ))
 
 
