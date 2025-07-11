@@ -1,0 +1,4 @@
+Number of available candidates in 2 < pT < 4 GeV/c:
+     Prompt: 49237
+     FD: 186560
+     Bkg: 2420649
