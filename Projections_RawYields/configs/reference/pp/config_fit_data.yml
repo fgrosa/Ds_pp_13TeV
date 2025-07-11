@@ -1,11 +1,11 @@
 inputs:
-  data: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/data/data.root
+  data: /home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/data/VsMult/FT0M/data_LHC23_full.root
   mc: 
     ds: Projections_RawYields/Data/LHC22o_pass7/VsMult/Projections_MC.root
     dplus: Projections_RawYields/Data/LHC22o_pass7/VsMult/Projections_MC.root
-  cutset: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/configs/cutset_OO5TeV.yml
+  cutset: Projections_RawYields/configs/cutset_pp13TeV_multiplicity.yml
 
-max_workers: 10
+max_workers: 1
 
 zfit_cpus:
   intra: 20
@@ -18,11 +18,11 @@ fit_configs:
     maxs: [2.1, 2.1, 2.1, 2.15, 2.15, 2.15]
   rebin: [2, 2, 2, 2, 4, 4]
   signal:
-    signal_funcs: [["gaussian", "gaussian"], ["gaussian", "gaussian"], ["gaussian", "gaussian"],
-      ["gaussian", "gaussian"], ["gaussian", "gaussian"], ["gaussian", "gaussian"]]
+    signal_funcs: [["doublecbsymm", "doublecbsymm"], ["doublecbsymm", "doublecbsymm"], ["doublecbsymm", "doublecbsymm"],
+      ["doublecbsymm", "doublecbsymm"], ["doublecbsymm", "doublecbsymm"], ["doublecbsymm", "doublecbsymm"]]
     par_init_limit:
       - sigma:
-          init: [0.001, 0.01, 0.01, 0.02, 0.02, 0.02]
+          init: [0.01, 0.01, 0.01, 0.02, 0.02, 0.02]
           min: [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
           max: [0.013, 0.013, 0.02, 0.03, 0.04, 0.04]
           fix: [false, false, false, false, false, false]
@@ -37,7 +37,7 @@ fit_configs:
           max: [100., 100., 100., 100., 100., 100.]
           fix: [true, true, true, true, true, true]
       - sigma:
-          init: [0.001, 0.01, 0.015, 0.02, 0.02, 0.02]
+          init: [0.01, 0.01, 0.015, 0.02, 0.02, 0.02]
           min: [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
           max: [0.013, 0.013, 0.025, 0.03, 0.04, 0.04]
           fix: [false, false, false, false, false, false]
@@ -52,16 +52,16 @@ fit_configs:
           max: [100., 100., 100., 100., 100., 100.]
           fix: [true, true, true, true, true, true]
 
-    fix_sigma_to_mb: [false, false, false, false, false, false]
+    fix_sigma_to_mb: [true, true, true, true, true, true]
     fix_ds_sigma: [false, false, false, false, false, false]
     ds_sigma: # value, list or path to root_file. If null or empty, fit MC and then use that sigma
     fix_dplus_sigma: [false, false, false, false, false, false]
     dplus_sigma: [] # value, list or path to root_file. If null or empty, fit MC and then use that sigma
-    fix_sigma_dplus_to_ds: [false, false, false, false, false, false]
+    fix_sigma_dplus_to_ds: [true, true, true, true, true, true]
     ratio_sigma_dplus_to_ds: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] # value, list or path to root_file. If null or empty, set dplus sigma to that of ds. Otherwise, set to ds sigma * value
   bkg:
-    bkg_funcs: [['chebpol2'], ['chebpol2'], ['chebpol2'], ['chebpol2'], ['chebpol2'], ['chebpol2']]
-    use_bkg_templ: [false, false, false, false, false, false]
+    bkg_funcs: [['chebpol2'], ['expo'], ['chebpol2'], ['chebpol2'], ['chebpol2'], ['chebpol2']]
+    use_bkg_templ: [true, true, true, true, true, true]
     templ_norm:
       fix_to_mb: [true, true, true, true, true, true]
       fix_to_file_name: null # set to null if no file is needed
@@ -91,11 +91,9 @@ fit_configs:
         br:
           pdg: 0.00269
           simulations: 0.4263
-    
 
-
-output:
-  directory: "/home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/data/OO"
+outputs:
+  directory: "Projections_RawYields/data/VsMult/FT0M/2023_h1_fix_template_params_sigma_for_figure"
   suffix: ""
   save_all_fits: true
-  formats: ["png", "pdf"]
+  formats: ["png", "pdf", "root"]

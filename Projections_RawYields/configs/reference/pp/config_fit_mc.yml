@@ -1,0 +1,79 @@
+inputs:
+  data: /home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/MC/VsMult/LHC24h1/w_bdt/dplus_prompt.root
+  mc: 
+    ds: Projections_RawYields/Data/LHC22o_pass7/VsMult/Projections_MC.root
+    dplus: Projections_RawYields/Data/LHC22o_pass7/VsMult/Projections_MC.root
+  cutset: /home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/configs/cutset_pp13TeV_no_mult_MC.yml
+
+max_workers: 30
+
+zfit_cpus:
+  intra: 20
+  inter: 20
+
+fit_configs:
+  # below one per pT bin
+  mass:
+    mins: [1.75, 1.75, 1.75, 1.75, 1.75, 1.75]
+    maxs: [2.1, 2.1, 2.1, 2.1, 2.1, 2.1]
+  rebin: [2, 2, 2, 2, 2, 2]
+  signal:
+    signal_funcs: [["doublecbsymm"], ["doublecbsymm"], ["doublecbsymm"],
+      ["doublecbsymm"], ["doublecbsymm"], ["doublecbsymm"]]
+    par_init_limit: 
+      - sigma:
+          init: [0.01, 0.01, 0.01, 0.02, 0.02, 0.02]
+          min: [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
+          max: [0.013, 0.013, 0.02, 0.03, 0.04, 0.04]
+          fix: [false, false, false, false, false, false]
+        alpha:
+          init: [1.94, 1.73, 1.61, 1.63, 1.69, 1.83]
+          min: [0., 0., 0., 0., 0.5, 0.75]
+          max: [5., 5., 5., 5., 5., 5.]
+          fix: [false, false, false, false, false, false]
+        n:
+          init: [3.28, 3.74, 4.31, 4.10, 3.87, 3.15]
+          min: [3, 3, 3, 3, 3, 3]
+          max: [100., 100., 100., 100., 100., 100.]
+          fix: [false, false, false, false, false, false]
+        mu:
+          init: [1.87, 1.87, 1.87, 1.87, 1.87, 1.87]
+          min: [1.8, 1.8, 1.8, 1.8, 1.8, 1.8]
+          max: [2.00, 2.00, 2.00, 2.00, 2.00, 2.00]
+          fix: [false, false, false, false, false, false]
+    fix_sigma_to_mb: [false, false, false, false, false, false]
+    fix_ds_sigma: [false, false, false, false, false, false]
+    ds_sigma: # value, list or path to root_file. If null or empty, fit MC and then use that sigma
+    fix_dplus_sigma: [false, false, false, false, false, false]
+    dplus_sigma: [] # value, list or path to root_file. If null or empty, fit MC and then use that sigma
+    fix_sigma_dplus_to_ds: [false, false, false, false, false, false]
+    ratio_sigma_dplus_to_ds: [0, 0, 0, 0.8, 0.8, 0.8] # value, list or path to root_file. If null or empty, set dplus sigma to that of ds. Otherwise, set to ds sigma * value
+  bkg:
+    bkg_funcs: [['nobkg'], ['nobkg'], ['nobkg'], ['nobkg'], ['nobkg'], ['nobkg']]
+    use_bkg_templ: [false, false, false, false, false, false]
+    template_file: Projections_RawYields/Data/LHC22o_pass7/VsMult/DplusForTemplateHistos_Train165702.root
+    hist_name: 'h_mass_{pt_min}_{pt_max}_cent_0_100' # can use also pt_min, pt_max, cent_min, cent_max to format name. pt variables are multiplied by 10 to avoid floating point issues
+    templ_norm:
+      fix_to_mb: [false, false, false, false, false, false]
+      fix_to_file_name: null # set to null if no file is needed
+      hist_name: h_corr_bkg_over_dplus_signal_0_100  # can use also pt_min, pt_max, cent_min, cent_max to format name. pt variables are multiplied by 10 to avoid floating point issues
+      fix_with_br: [false, false, false, false, false, false]
+      reference_file_bkg: /home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/MC/VsMult/d_plus_corr_bkg_template_w_bdt.root
+      reference_file_signal: /home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/MC/VsMult/dplus_w_bdt.root # str or list of str
+      reference_hist_name: 'h_mass_{pt_min}_{pt_max}_cent_0_100'
+      br_dplus_to_phipi:
+        pdg: 0.00269
+        simulations: 0.0752
+      br_dplus_to_pikpi:
+        pdg: 0.0938 # inclusive one
+        simulations: 0.0752
+      br_dplus_to_k0*pi:
+        pdg: -1 # not used
+        simulations: 0.0104
+
+
+outputs:
+  directory: "/home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/MC/VsMult/LHC24h1/w_bdt/fits/doublecb/fits_dplus_prompt"
+  suffix: "dplus_prompt"
+  save_all_fits: true
+  formats: ["png"]

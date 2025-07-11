@@ -19,5 +19,5 @@ ml_output_prompt:
 ml_output_bkg:
     axisnum: 3
     min: [0, 0, 0, 0, 0, 0, 0]
-    max: [0.075, 0.075,  0.12, 0.15,  0.2, 0.3,  0.5]
+    max: [0.01, 0.075,  0.12, 0.15,  0.2, 0.3,  0.5]
     name: 'ML_output_Bkg'

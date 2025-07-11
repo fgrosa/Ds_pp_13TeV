@@ -1,0 +1,42 @@
+inputs:
+  names: [
+    # /home/fchinu/Run3/Ds_pp_13TeV/Datasets/Ds_pp_run3_ml/Data/Train279067/AnalysisResults_LHC22o_pass7.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_hy_2354077.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_hy_2354079.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_1.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_2.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_3.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_4.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_5.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_6.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_7.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_8.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_9.root,
+    /home/fchinu/Run3/Ds_OO_5TeV/Datasets/Data/Train443435/AnalysisResults_LHC25ae_10.root,
+
+  ] # string or list of strings
+  sparses: hf-task-ds/Data/hSparseMass
+  event_histogram: eventselection-run3/luminosity/hCounterTVXafterBCcuts
+
+  cutset: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/configs/cutset_OO5TeV.yml
+
+max_workers: 10
+
+output:
+  directory: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/data
+  file_names: [
+    # data_LHC22.root,
+    data_1.root,
+    data_2.root,
+    data_3.root,
+    data_4.root,
+    data_5.root,
+    data_6.root,
+    data_7.root,
+    data_8.root,
+    data_9.root,
+    data_10.root,
+    data_11.root,
+    data_12.root,
+    data_13.root
+  ]

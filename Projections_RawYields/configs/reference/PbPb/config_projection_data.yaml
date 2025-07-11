@@ -5,7 +5,7 @@ inputs:
 
   ] # string or list of strings
   sparses: hf-task-ds/Data/hSparseMass
-  event_histogram: lumi-task/hCounterTVXafterBCcuts #eventselection-run3/luminosity/hCounterTVXafterBCcuts
+  event_histogram: eventselection-run3/luminosity/hCounterTVXafterBCcuts
 
   cutset: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/configs/cutset_OO5TeV.yml
 
