@@ -85,12 +85,12 @@ $(OUTPUT_FIT):
 	@mkdir -p $@
 
 # Copy and modify configuration files
-$(DEST_CONFIG_PROJ): $(SRC_CONFIG_PROJ) | $(OUTPUT_PROJ)
+$(DEST_CONFIG_PROJ): $(SRC_CONFIG_PROJ) $(DEST_CONFIG_CUTSET) | $(OUTPUT_PROJ)
 	@cp $< $@
 	@sed -i 's|directory: .*|directory: "$(abspath $(OUTPUT_PROJ))"|g' $@
 	@sed -i 's|cutset: .*|cutset: "$(abspath $(DEST_CONFIG_CUTSET))"|g' $@
 
-$(DEST_CONFIG_FIT): $(SRC_CONFIG_FIT) | $(OUTPUT_FIT)
+$(DEST_CONFIG_FIT): $(SRC_CONFIG_FIT) $(DEST_CONFIG_CUTSET) | $(OUTPUT_FIT)
 	@cp $< $@
 	@sed -i 's|directory: .*|directory: "$(abspath $(OUTPUT_FIT))"|g' $@
 	@sed -i 's|cutset: .*|cutset: "$(abspath $(DEST_CONFIG_CUTSET))"|g' $@
