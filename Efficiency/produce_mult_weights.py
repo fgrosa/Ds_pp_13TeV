@@ -225,7 +225,7 @@ def dump_to_root(cfg, h_weights, cent_min, cent_max):  # pylint: disable=too-man
     - cent_max (int): Maximum centrality value.
     """
     for task_name, suffix in zip(cfg['inputs']['task_names'], cfg['output']['suffix']):
-        out_file_name = os.path.join(cfg['output']['dir'], f"weights_{suffix}.root")
+        out_file_name = os.path.join(cfg['output']['directory'], f"weights_{suffix}.root")
         with ROOT.TFile(out_file_name, "UPDATE") as out_file:
             # create a directory for the centrality range
             if not out_file.Get(f"centrality_{cent_min}_{cent_max}"):
@@ -305,7 +305,7 @@ def main(cfg_file_name):
 
     # Create output file
     for suffix in cfg['output']['suffix']:
-        out_file_name = os.path.join(cfg['output']['dir'], f"weights_{suffix}.root")
+        out_file_name = os.path.join(cfg['output']['directory'], f"weights_{suffix}.root")
         out_file = ROOT.TFile(out_file_name, "RECREATE")
         out_file.Close()
 
