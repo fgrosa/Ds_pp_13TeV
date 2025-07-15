@@ -12,6 +12,42 @@ import numpy as np
 from hipe4ml.model_handler import ModelHandler
 from hipe4ml.tree_handler import TreeHandler
 
+def swap_prongs(df):
+    df['fNSigTpcTofKaExpKa0'] = df.apply(
+        lambda row: row['fNSigTpcTofKa2'] if row['fIsCandidateSwapped'] else row['fNSigTpcTofKa0'],
+        axis=1
+    )
+    df['fNSigTpcTofPiExpPi2'] = df.apply(
+        lambda row: row['fNSigTpcTofPi0'] if row['fIsCandidateSwapped'] else row['fNSigTpcTofPi2'],
+        axis=1
+    )
+    df['fNSigTofKaExpKa0'] = df.apply(
+        lambda row: row['fNSigTofKa2'] if row['fIsCandidateSwapped'] else row['fNSigTofKa0'],
+        axis=1
+    )
+    df['fNSigTofPiExpPi2'] = df.apply(
+        lambda row: row['fNSigTofPi0'] if row['fIsCandidateSwapped'] else row['fNSigTofPi2'],
+        axis=1
+    )
+    df['fNSigTpcKaExpKa0'] = df.apply(
+        lambda row: row['fNSigTpcKa2'] if row['fIsCandidateSwapped'] else row['fNSigTpcKa0'],
+        axis=1
+    )
+    df['fNSigTpcPiExpPi2'] = df.apply(
+        lambda row: row['fNSigTpcPi0'] if row['fIsCandidateSwapped'] else row['fNSigTpcPi2'],
+        axis=1
+    )
+
+def swap_prongs_others(df):
+    df['fImpactParameter0Exp0'] = df.apply(
+        lambda row: row['fImpactParameter2'] if row['fIsCandidateSwapped'] else row['fImpactParameter0'],
+        axis=1
+    )
+    df['fImpactParameter2Exp2'] = df.apply(
+        lambda row: row['fImpactParameter0'] if row['fIsCandidateSwapped'] else row['fImpactParameter2'],
+        axis=1
+    )
+
 def main(): #pylint: disable=too-many-statements, too-many-branches
     # read config file
     parser = argparse.ArgumentParser(description='Arguments to pass')
@@ -66,6 +102,8 @@ def main(): #pylint: disable=too-many-statements, too-many-branches
             else:
                 os.makedirs(OutPutDirPt)
             DataDfPtSel = DataHandler.get_slice(iBin)
+            swap_prongs(DataDfPtSel)
+            #swap_prongs_others(DataDfPtSel)
             yPred = ModelHandls[iBin].predict(DataDfPtSel, inputCfg['ml']['raw_output'])
             ColumnsToSaveFinal = ColumnsToSave
             if not isinstance(ColumnsToSaveFinal, list):
