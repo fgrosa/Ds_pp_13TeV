@@ -10,13 +10,13 @@ SELECTIONS="" #"fNSigTpcTofKa0 < 1.e5 and fNSigTpcTofKa1 < 1.e5 and fNSigTpcTofK
 TRAIN_FRACTION=1
 ISMC=true
 MC_SELECTIONS=(
-    "PromptDs:abs(fFlagMcMatchRec) == 4 and fOriginMcRec == 1 and fFlagMcDecayChanRec == 1"
-    "PromptDplus:abs(fFlagMcMatchRec) == 4 and fOriginMcRec == 1 and fFlagMcDecayChanRec == 3"
-    "Prompt:abs(fFlagMcMatchRec) == 4 and fOriginMcRec == 1 and (fFlagMcDecayChanRec == 3 or fFlagMcDecayChanRec == 1)"
-    "NonPromptDs:abs(fFlagMcMatchRec) == 4 and fOriginMcRec == 2 and fFlagMcDecayChanRec == 1"
-    "NonPromptDplus:abs(fFlagMcMatchRec) == 4 and fOriginMcRec == 2 and fFlagMcDecayChanRec == 3"
-    "NonPrompt:abs(fFlagMcMatchRec) == 4 and fOriginMcRec == 2 and (fFlagMcDecayChanRec == 3 or fFlagMcDecayChanRec == 1)"
-    "DplusBkg:abs(fFlagMcMatchRec) == 1"
+    "PromptDs:abs(fFlagMcMatchRec) == 5 and fOriginMcRec == 1 and fFlagMcDecayChanRec == 6"
+    "PromptDplus:abs(fFlagMcMatchRec) == 4 and fOriginMcRec == 1 and fFlagMcDecayChanRec == 1"
+    "Prompt:(abs(fFlagMcMatchRec) == 4 or abs(fFlagMcMatchRec) == 5) and fOriginMcRec == 1 and (fFlagMcDecayChanRec == 1 or fFlagMcDecayChanRec == 6)"
+    "NonPromptDs:abs(fFlagMcMatchRec) == 5 and fOriginMcRec == 2 and fFlagMcDecayChanRec == 6"
+    "NonPromptDplus:abs(fFlagMcMatchRec) == 4 and fOriginMcRec == 2 and fFlagMcDecayChanRec == 1"
+    "NonPrompt:(abs(fFlagMcMatchRec) == 4 or abs(fFlagMcMatchRec) == 5) and fOriginMcRec == 2 and (fFlagMcDecayChanRec == 1 or fFlagMcDecayChanRec == 6)"
+    "DplusBkg:abs(fFlagMcMatchRec) == 0"
     ) # Array of selections in the form "Name:selection", or "" if no selection is needed
 
 TREE_NAME=("O2hfcanddslite") # Can be an array of strings for multiple trees, or a single string for a single tree. "*" for all trees.
