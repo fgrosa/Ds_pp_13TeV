@@ -6,20 +6,11 @@ import os
 import sys
 import argparse
 import numpy as np
+import matplotlib.pyplot as plt
 from flarefly.data_handler import DataHandler
 from flarefly.fitter import F2MassFitter
 import ROOT
 
-
-def set_graph_style(graph, color=ROOT.kBlack):
-    """
-    Method for style setting
-    """
-
-    graph.SetMarkerStyle(ROOT.kFullCircle)
-    graph.SetMarkerColor(color)
-    graph.SetLineColor(color)
-    graph.SetLineWidth(2)
 
 def perform_fit(file_name, histo_name, fitter_name, sgn_funcs, bkg_funcs,
                 mass_min, mass_max):
@@ -60,14 +51,6 @@ def optimise_signif(infile_name, force_project, project_only, bdt_min, bdt_max, 
     Method for fitting
     """
 
-    ROOT.gStyle.SetTitleSize(0.045, "xy")
-    ROOT.gStyle.SetLabelSize(0.04, "xy")
-    ROOT.gStyle.SetPadLeftMargin(0.15)
-    ROOT.gStyle.SetPadTopMargin(0.035)
-    ROOT.gStyle.SetPadRightMargin(0.035)
-    ROOT.gStyle.SetPadTickX(1)
-    ROOT.gStyle.SetPadTickY(1)
-
     infile_name_histos = os.path.join(
         outputdir, f"hist_mass_pt{pt_min:.0f}_{pt_max:.0f}_cent{cent_min:.0f}_{cent_max:.0f}.root")
     if force_project or not os.path.isfile(infile_name_histos):
@@ -87,31 +70,13 @@ def optimise_signif(infile_name, force_project, project_only, bdt_min, bdt_max, 
     outfile = ROOT.TFile(outfile_name, "recreate")
     outfile.Close()
 
-    graph_rawyield, graph_sigma, graph_mean, graph_significance, graph_soverb = (
-        [] for _ in range(5))
     part_names = ["ds", "dplus"]
     part_colors = [ROOT.kRed+1, ROOT.kAzure+4]
-    for isig in range(2):
-        graph_rawyield.append(ROOT.TGraphErrors(ncuts))
-        graph_sigma.append(ROOT.TGraphErrors(ncuts))
-        graph_mean.append(ROOT.TGraphErrors(ncuts))
-        graph_significance.append(ROOT.TGraphErrors(ncuts))
-        graph_soverb.append(ROOT.TGraphErrors(ncuts))
-        graph_rawyield[isig].SetNameTitle(f"graph_rawyield_{part_names[isig]}",
-                                          ";BDT bkg < ; raw yield")
-        graph_sigma[isig].SetNameTitle(f"graph_sigma_{part_names[isig]}",
-                                       ";BDT bkg < ; #sigma (GeV/#it{c}^{2})")
-        graph_mean[isig].SetNameTitle(f"graph_mean_{part_names[isig]}",
-                                      ";BDT bkg < ; #mu (GeV/#it{c}^{2})")
-        graph_significance[isig].SetNameTitle(f"graph_significance_{part_names[isig]}",
-                                              ";BDT bkg < ; significance(3#sigma)")
-        graph_soverb[isig].SetNameTitle(f"graph_soverb_{part_names[isig]}",
-                                        ";BDT bkg < ; S/B(3#sigma)")
-        set_graph_style(graph_rawyield[isig], part_colors[isig])
-        set_graph_style(graph_sigma[isig], part_colors[isig])
-        set_graph_style(graph_mean[isig], part_colors[isig])
-        set_graph_style(graph_significance[isig], part_colors[isig])
-        set_graph_style(graph_soverb[isig], part_colors[isig])
+    rawyields = [[], []]
+    sigmas = [[], []]
+    means = [[], []]
+    significances = [[], []]
+    sobs = [[], []]
 
     max_rawy, max_signif, max_soverb = 0., 0., 0.
     for icut, cut in enumerate(cuts_to_test):
@@ -133,16 +98,11 @@ def optimise_signif(infile_name, force_project, project_only, bdt_min, bdt_max, 
                 max_signif = max(max_signif, significance[0])
                 soverb = fitter_data.get_signal_over_background(isig, nsigma=3)
                 max_soverb = max(max_soverb, soverb[0])
-                graph_rawyield[isig].SetPoint(icut, cut, rawyield[0])
-                graph_rawyield[isig].SetPointError(icut, 0, rawyield[1])
-                graph_sigma[isig].SetPoint(icut, cut, sigma[0])
-                graph_sigma[isig].SetPointError(icut, 0, sigma[1])
-                graph_mean[isig].SetPoint(icut, cut, mean[0])
-                graph_mean[isig].SetPointError(icut, 0, mean[1])
-                graph_soverb[isig].SetPoint(icut, cut, soverb[0])
-                graph_soverb[isig].SetPointError(icut, 0, soverb[1])
-                graph_significance[isig].SetPoint(icut, cut, significance[0])
-                graph_significance[isig].SetPointError(icut, 0, significance[1])
+                rawyields[isig].append(rawyield)
+                sigmas[isig].append(sigma)
+                means[isig].append(mean)
+                significances[isig].append(significance)
+                sobs[isig].append(soverb)
 
             fitter_data.dump_to_root(outfile_name,
                                      option="update",
@@ -159,49 +119,78 @@ def optimise_signif(infile_name, force_project, project_only, bdt_min, bdt_max, 
                 os.path.join(outputdir, f"massfitres_pt{pt_min:.0f}_{pt_max:.0f}_bdt{cut:.3f}.pdf")
             )
 
-    canv = ROOT.TCanvas("canv_signif", "", 1920, 1080)
-    canv.Divide(3, 2)
-    canv.cd(1).DrawFrame(
-        bdt_min, 0., bdt_max, max_rawy*1.2, ";BDT bkg < ; raw yield")
-    for isig in range(2):
-        graph_rawyield[isig].Draw("p")
-    canv.cd(2).DrawFrame(
-        bdt_min, 0., bdt_max, 0.05, ";BDT bkg < ; #sigma (GeV/#it{c}^{2})")
-    for isig in range(2):
-        graph_sigma[isig].Draw("p")
-    canv.cd(3).DrawFrame(
-        bdt_min, 1.8, bdt_max, 2.0, ";BDT bkg < ; #mu (GeV/#it{c}^{2})")
-    for isig in range(2):
-        graph_mean[isig].Draw("p")
-    canv.cd(4).DrawFrame(
-        bdt_min, 0., bdt_max, max_signif*1.2, ";BDT bkg < ; significance(3#sigma)")
-    for isig in range(2):
-        graph_significance[isig].Draw("p")
-    canv.cd(5).DrawFrame(
-        bdt_min, 0., bdt_max, max_soverb*1.2, ";BDT bkg < ; S/B(3#sigma)")
-    for isig in range(2):
-        graph_soverb[isig].Draw("p")
-    canv.cd(6)
-    leg = ROOT.TLegend(0.2, 0.5, 0.8, 0.8)
-    leg.SetTextSize(0.05)
-    leg.SetBorderSize(0)
-    leg.SetFillStyle(0)
-    leg.SetHeader(f"#splitline{{{pt_min:.0f} < #it{{p}}_{{T}} < {pt_max:.0f} GeV/#it{{c}}}}{{Centrality {cent_min:.0f}#minus{cent_max:.0f}%}}")
-    leg.AddEntry(graph_significance[0], "D_{s}^{+}", "lp")
-    leg.AddEntry(graph_significance[1], "D^{+}", "lp")
-    leg.Draw()
+    cuts = cuts_to_test
+    xlim = (bdt_min - 0.5*bdt_step, bdt_max + 0.5*bdt_step)
 
-    canv.SaveAs(outfile_name.replace(".root", ".pdf"))
+    fig, axes = plt.subplots(2, 3, figsize=(20, 12))
+    axes = axes.flatten()
+    for ax in axes:
+        ax.set_xlim(xlim)
 
-    outfile_nocut = ROOT.TFile(outfile_name, "update")
-    canv.Write()
+    labels = [r"$\mathrm{D_s^+}$", r"$\mathrm{D^+}$"]
+    colors = ["red", "C0"]
+
+    # Raw yield
     for isig in range(2):
-        graph_rawyield[isig].Write()
-        graph_sigma[isig].Write()
-        graph_mean[isig].Write()
-        graph_soverb[isig].Write()
-        graph_significance[isig].Write()
-    outfile_nocut.Close()
+        axes[0].errorbar(cuts, [p[0] for p in rawyields[isig]],
+                        yerr=[p[1] for p in rawyields[isig]],
+                        fmt="o-", color=colors[isig], label=labels[isig])
+    axes[0].set_ylabel("Raw yield")
+    axes[0].set_xlabel("BDT bkg <")
+    axes[0].xaxis.set_label_coords(0.8, -0.1)
+    axes[0].legend()
+
+    # Sigma
+    for isig in range(2):
+        axes[1].errorbar(cuts, [p[0] for p in sigmas[isig]],
+                        yerr=[p[1] for p in sigmas[isig]],
+                        fmt="o-", color=colors[isig])
+    axes[1].set_ylabel(r"$\sigma$ (GeV/$c^2$)")
+    axes[1].set_xlabel("BDT bkg <")
+    axes[1].xaxis.set_label_coords(0.8, -0.1)
+
+    # Mean
+    for isig in range(2):
+        axes[2].errorbar(cuts, [p[0] for p in means[isig]],
+                        yerr=[p[1] for p in means[isig]],
+                        fmt="o-", color=colors[isig])
+    axes[2].set_ylabel(r"$\mu$ (GeV/$c^2$)")
+    axes[2].set_xlabel("BDT bkg <")
+    axes[2].xaxis.set_label_coords(0.8, -0.1)
+
+    # Significance
+    for isig in range(2):
+        axes[3].errorbar(cuts, [p[0] for p in significances[isig]],
+                        yerr=[p[1] for p in significances[isig]],
+                        fmt="o-", color=colors[isig])
+    axes[3].set_ylabel("Significance (3σ)")
+    axes[3].set_xlabel("BDT bkg <")
+    axes[3].xaxis.set_label_coords(0.8, -0.1)
+
+    # S/B
+    for isig in range(2):
+        axes[4].errorbar(cuts, [p[0] for p in sobs[isig]],
+                        yerr=[p[1] for p in sobs[isig]],
+                        fmt="o-", color=colors[isig])
+    axes[4].set_ylabel("S/B (3σ)")
+    axes[4].set_xlabel("BDT bkg <")
+    axes[4].xaxis.set_label_coords(0.8, -0.1)
+
+    # Legend
+    axes[5].axis("off")
+
+    # Invisible lines for the legend
+    line1 = axes[5].plot([], [], 'o-', color=colors[0], label=labels[0])[0]
+    line2 = axes[5].plot([], [], 'o-', color=colors[1], label=labels[1])[0]
+
+    textstr = rf"${pt_min:.0f} < p_\mathrm{{T}} < {pt_max:.0f}~\mathrm{{GeV/}}c$" f"\nCentrality: {cent_min:.0f}-{cent_max:.0f} %"
+    axes[5].text(0.5, 0.9, textstr, transform=axes[5].transAxes, fontsize=20,
+                 verticalalignment='top', horizontalalignment='center')
+    axes[5].legend(handles=[line1, line2], loc="center", fontsize=24)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(outputdir, f"significance_scan_pt{pt_min:.0f}_{pt_max:.0f}_cent{cent_min:.0f}_{cent_max:.0f}.pdf"))
+    plt.close()
 
 
 # function to project the sparse
