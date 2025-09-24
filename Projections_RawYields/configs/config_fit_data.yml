@@ -1,9 +1,9 @@
 inputs:
-  data: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/data/data.root
+  data: "/home/fchinu/Run3/Ds_Dp_ratio_PbPb/Projections_RawYields/data/norm_vars/Projections/projections.root"
   mc: 
     ds: Projections_RawYields/Data/LHC22o_pass7/VsMult/Projections_MC.root
     dplus: Projections_RawYields/Data/LHC22o_pass7/VsMult/Projections_MC.root
-  cutset: /home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/configs/cutset_OO5TeV.yml
+  cutset: "/home/fchinu/Run3/Ds_Dp_ratio_PbPb/Projections_RawYields/data/norm_vars/Projections/cutset.yml"
 
 max_workers: 10
 
@@ -16,7 +16,7 @@ fit_configs:
   mass:
     mins: [1.75, 1.75, 1.75, 1.73, 1.73, 1.73]
     maxs: [2.1, 2.1, 2.1, 2.15, 2.15, 2.15]
-  rebin: [2, 2, 2, 2, 4, 4]
+  rebin: [4, 4, 4, 4, 4, 4]
   signal:
     signal_funcs: [["gaussian", "gaussian"], ["gaussian", "gaussian"], ["gaussian", "gaussian"],
       ["gaussian", "gaussian"], ["gaussian", "gaussian"], ["gaussian", "gaussian"]]
@@ -71,7 +71,7 @@ fit_configs:
       - name: $\mathrm{D^{+}}\rightarrow K^{-}\pi^{+}\pi^{+}$
         file_norm: /home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/MC/VsMult/LHC24h1/w_bdt/dplus_bkg.root # with BDT selections (for normalisation)
         norm_hist_name: 'h_mass_{pt_min}_{pt_max}'
-        template_file: /home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/MC/VsMult/LHC24h1/no_bdt/d_plus_corr_bkg_template.root
+        template_file: /home/fchinu/Run3/Ds_pp_13TeV/Projections_RawYields/MC/VsMult/LHC24h1/no_bdt/dplus_corr_bkg_template.root
         template_hist_name: 'h_mass_{pt_min}_{pt_max}' # can use also pt_min, pt_max, cent_min, cent_max to format name. pt variables are multiplied by 10 to avoid floating point issues
         br:
           pdg: 0.0938 # K pi pi
@@ -95,7 +95,7 @@ fit_configs:
 
 
 output:
-  directory: "/home/fchinu/Run3/Ds_OO_5TeV/Projections_RawYields/data/OO"
+  directory: "/home/fchinu/Run3/Ds_Dp_ratio_PbPb/Projections_RawYields/data/norm_vars/RawYields"
   suffix: ""
   save_all_fits: true
   formats: ["png", "pdf"]

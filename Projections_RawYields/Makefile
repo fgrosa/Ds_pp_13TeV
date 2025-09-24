@@ -17,43 +17,63 @@ endif
 TRIAL_DIR = $(BASE_DIR)/$(NAME)
 
 # Output directories
-OUTPUT_PROJ = $(TRIAL_DIR)/Projections
+OUTPUT_PROJ_BASE = $(TRIAL_DIR)/Projections
+OUTPUT_PROJ_TEMPLATE = $(OUTPUT_PROJ_BASE)/wo_bdt
 OUTPUT_FIT = $(TRIAL_DIR)/RawYields
 
 # Configuration files (adjust names based on data type)
 ifeq ($(ISDATA),true)
     CONFIG_PROJ = config_projection_data.yaml
     CONFIG_FIT = config_fit_data.yml
+	OUTPUT_PROJ = $(OUTPUT_PROJ_BASE)
 else
     CONFIG_PROJ = config_projection_mc.yaml
+    CONFIG_PROJ_TEMPLATE = config_projection_mc_template.yaml
     CONFIG_FIT = config_fit_mc.yml
+	OUTPUT_PROJ = $(OUTPUT_PROJ_BASE)/w_bdt
 endif
 CONFIG_CUTSET = cutset.yml
+CONFIG_CUTSET_TEMPLATE = cutset_template.yml
 
 # Source configuration files
 SRC_CONFIG_PROJ = $(BASE_CONFIG_DIR)/$(CONFIG_PROJ)
 SRC_CONFIG_FIT = $(BASE_CONFIG_DIR)/$(CONFIG_FIT)
 SRC_CONFIG_CUTSET = $(BASE_CONFIG_DIR)/$(CONFIG_CUTSET)
+SRC_CONFIG_CUTSET_TEMPLATE = $(BASE_CONFIG_DIR)/$(CONFIG_CUTSET_TEMPLATE)
 
 # Copied configuration files
 DEST_CONFIG_PROJ = $(OUTPUT_PROJ)/$(CONFIG_PROJ)
+DEST_CONFIG_PROJ_TEMPLATE = $(OUTPUT_PROJ_TEMPLATE)/$(CONFIG_PROJ_TEMPLATE)
 DEST_CONFIG_FIT = $(OUTPUT_FIT)/$(CONFIG_FIT)
 DEST_CONFIG_CUTSET = $(OUTPUT_PROJ)/$(CONFIG_CUTSET)
+DEST_CONFIG_CUTSET_TEMPLATE = $(OUTPUT_PROJ_TEMPLATE)/$(CONFIG_CUTSET_TEMPLATE)
 
 # Scripts (adjust paths as needed)
 PROJ_SCRIPT = project_data_from_sparse.py
 FIT_SCRIPT = get_raw_yields_ds_dplus_flarefly.py
+TEMPLATE_SCRIPT = get_templates.py
 
 # Output files (adjust based on what your scripts actually produce)
 PROJ_OUTPUT = $(OUTPUT_PROJ)/projections.done
 FIT_OUTPUT = $(OUTPUT_FIT)/rawYields.done
+TEMPLATE_OUTPUT = $(OUTPUT_PROJ_TEMPLATE)/dplus_corr_bkg_template.root
 SOURCE_FILE = $(TRIAL_DIR)/source.sh
 
 # Define the targets
 .PHONY: all clean-output help setup
 
 # Default target
-all: setup project fit
+ifeq ($(ISDATA),true)
+all: all-data
+else
+all: all-mc
+endif
+
+# Data
+all-data: setup project fit
+
+# MC
+all-mc: setup project template
 
 # Help target
 help:
@@ -76,7 +96,11 @@ help:
 	@echo "Note: Config files are automatically modified to use correct output directories"
 
 # Setup directories and copy configs
-setup: $(OUTPUT_PROJ) $(OUTPUT_FIT) $(DEST_CONFIG_PROJ) $(DEST_CONFIG_FIT) $(DEST_CONFIG_CUTSET) $(SOURCE_FILE)
+ifeq ($(ISDATA),true)
+setup: $(OUTPUT_PROJ) $(OUTPUT_FIT) $(DEST_CONFIG_PROJ) $(DEST_CONFIG_FIT) $(DEST_CONFIG_CUTSET)
+else
+setup: $(OUTPUT_PROJ) $(DEST_CONFIG_PROJ) $(DEST_CONFIG_CUTSET) $(OUTPUT_PROJ_TEMPLATE) $(DEST_CONFIG_PROJ_TEMPLATE) $(DEST_CONFIG_CUTSET_TEMPLATE)
+endif
 
 # Create directories
 $(OUTPUT_PROJ):
@@ -85,21 +109,25 @@ $(OUTPUT_PROJ):
 $(OUTPUT_FIT):
 	@mkdir -p $@
 
+$(OUTPUT_PROJ_TEMPLATE):
+	@mkdir -p $@
 
 # Create source file with environment variables
 $(SOURCE_FILE):
-	@echo "Creating source file with environment variables..."
 	@echo "#!/bin/bash" > $@
 	@echo "export NAME=$(NAME)" >> $@
 	@echo "export ISDATA=$(ISDATA)" >> $@
-
-source: $(SOURCE_FILE)
 
 # Copy and modify configuration files
 $(DEST_CONFIG_PROJ): $(SRC_CONFIG_PROJ) $(DEST_CONFIG_CUTSET) | $(OUTPUT_PROJ)
 	@cp $< $@
 	@sed -i 's|directory: .*|directory: "$(abspath $(OUTPUT_PROJ))"|g' $@
 	@sed -i 's|cutset: .*|cutset: "$(abspath $(DEST_CONFIG_CUTSET))"|g' $@
+
+$(DEST_CONFIG_PROJ_TEMPLATE): $(DEST_CONFIG_PROJ)
+	@cp $< $@
+	@sed -i 's|directory: .*|directory: "$(abspath $(OUTPUT_PROJ_TEMPLATE))"|g' $@
+	@sed -i 's|cutset: .*|cutset: "$(abspath $(DEST_CONFIG_CUTSET_TEMPLATE))"|g' $@
 
 $(DEST_CONFIG_FIT): $(SRC_CONFIG_FIT) $(DEST_CONFIG_CUTSET) | $(OUTPUT_FIT)
 	@cp $< $@
@@ -110,19 +138,35 @@ $(DEST_CONFIG_FIT): $(SRC_CONFIG_FIT) $(DEST_CONFIG_CUTSET) | $(OUTPUT_FIT)
 $(DEST_CONFIG_CUTSET): $(SRC_CONFIG_CUTSET) | $(OUTPUT_PROJ)
 	@cp $< $@
 
+$(DEST_CONFIG_CUTSET_TEMPLATE): $(SRC_CONFIG_CUTSET_TEMPLATE) | $(OUTPUT_PROJ_TEMPLATE)
+	@cp $< $@
+
 # Run projections
+ifeq ($(ISDATA),false)
+$(PROJ_OUTPUT): $(DEST_CONFIG_PROJ) $(DEST_CONFIG_CUTSET) $(PROJ_SCRIPT) $(DEST_CONFIG_PROJ_TEMPLATE)
+	@cd $(OUTPUT_PROJ) && find . -name "*.root" -delete && python3 $(abspath $(PROJ_SCRIPT)) $(CONFIG_PROJ) && hadd -f ./projections.root ./*.root
+	@cd $(OUTPUT_PROJ_TEMPLATE) && find . -name "*.root" -delete && python3 $(abspath $(PROJ_SCRIPT)) $(CONFIG_PROJ_TEMPLATE) && hadd -f ./projections.root ./*.root && hadd -f ./dplus.root ./dplus_nonprompt.root ./dplus_prompt.root
+	@touch $@
+else
 $(PROJ_OUTPUT): $(DEST_CONFIG_PROJ) $(DEST_CONFIG_CUTSET) $(PROJ_SCRIPT)
 	@cd $(OUTPUT_PROJ) && find . -name "*.root" -delete && python3 $(abspath $(PROJ_SCRIPT)) $(CONFIG_PROJ) && hadd -f ./projections.root ./*.root
 	@touch $@
+endif
 
-# Run fitting (depends on projections being complete)
+# Run fitting
 $(FIT_OUTPUT): $(PROJ_OUTPUT) $(DEST_CONFIG_FIT) $(FIT_SCRIPT)
 	@cd $(OUTPUT_FIT) && python3 $(abspath $(FIT_SCRIPT)) $(CONFIG_FIT)
 	@touch $@
 
+$(TEMPLATE_OUTPUT): $(DEST_CONFIG_PROJ_TEMPLATE) $(TEMPLATE_SCRIPT)
+	@cd $(OUTPUT_PROJ_TEMPLATE) && python3 $(abspath $(TEMPLATE_SCRIPT)) dplus_bkg.root dplus_corr_bkg_template.root
+	@touch $@
+
 # Convenient aliases
+source: $(SOURCE_FILE)
 project: $(PROJ_OUTPUT)
 fit: $(FIT_OUTPUT)
+template: $(TEMPLATE_OUTPUT)
 
 # Alternative clean that preserves configs
 clean-output:
